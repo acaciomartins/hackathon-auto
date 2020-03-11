@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
@@ -32,21 +31,25 @@ public class JmsConfig {
 	@Autowired
 	private SQSConnectionFactory connectionFactory;
 
-	@Autowired
-	private JmsTemplate jmsTemplate;
+//	@Value("${ibm.mq.queueManager}")
+//	private String queueManagerName;
 
-	@Value("${ibm.mq.queueManagerName}")
-	private String queueManagerName;
+//	@Value("${ibm.mq.channel}")
+//	private String channel;
 
-	@Value("${ibm.mq.queueName}")
-	private String queueName;
+//	@Value("${ibm.mq.connName}")
+//	private String connName;
 
-	@Value("${ibm.mq.clientmode.localAddress}")
-	private String localAddress;
+//	@Value("${ibm.mq.queueName}")
+//	private String queueName;
 
-	@Value("${ibm.mq.clientmode.port}")
-	private Integer port;
+//	@Value("${ibm.mq.clientmode.localAddress}")
+//	private String localAddress;
 
+//	@Value("${ibm.mq.clientmode.port}")
+//	private Integer port;
+
+	// SQS AWS \\
 	@Bean
 	public SQSConnectionFactory createConnectionFactory() {
 		return SQSConnectionFactory.builder().withRegion(Region.getRegion(Regions.US_EAST_1))
@@ -65,11 +68,11 @@ public class JmsConfig {
 		return factory;
 	}
 
-	@Bean
-	@Primary
-	public JmsTemplate defaultJmsTemplate() {
-		return new JmsTemplate(this.connectionFactory);
-	}
+//	@Bean
+//	@Primary
+//	public JmsTemplate defaultJmsTemplate() {
+//		return new JmsTemplate(this.connectionFactory);
+//	}
 
 	@Bean("mq")
 	public JmsTemplate jmsTemplate(@Autowired MQQueueConnectionFactory mqQueueConnectionFactory) throws JMSException {
@@ -84,12 +87,11 @@ public class JmsConfig {
 	@Bean
 	@Qualifier("clientmode")
 	public MQQueueConnectionFactory ibmMQConnectionFactoryInClientMode() throws JMSException {
-		MQQueueConnectionFactory mqQueueConnectionFactory = new MQQueueConnectionFactory();
-		mqQueueConnectionFactory.setQueueManager(queueManagerName);
+		final MQQueueConnectionFactory mqQueueConnectionFactory = new MQQueueConnectionFactory();
+		mqQueueConnectionFactory.setQueueManager("QMLI1062");
 		mqQueueConnectionFactory.setTransportType(1);
-
-		mqQueueConnectionFactory.setLocalAddress(localAddress);
-		mqQueueConnectionFactory.setPort(port);
+		mqQueueConnectionFactory.setConnectionNameList("LI1062");
+		mqQueueConnectionFactory.setChannel("SRVLI1062");
 
 		return mqQueueConnectionFactory;
 	}

@@ -4,55 +4,75 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlRootElement(name = "mq")
+@XmlType(name = "mq", propOrder = { "status", "origemPrincipal", "numeroPrincipal", "tipoProcesso" })
 public class Mensagem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String origem;
-	private String status;
-	private Long documento;
-
+	private Integer status;
+	private Integer origemPrincipal;
+	private Integer numeroPrincipal;
+	private String tipoProcesso;
+	@XmlTransient
 	public List<String> validacaoMensagens = new ArrayList<>();
 
-	public String getOrigem() {
-		return this.origem;
+	public Integer getStatus() {
+		return status;
 	}
 
-	public void setOrigem(final String origem) {
-		this.origem = origem;
-	}
-
-	public String getStatus() {
-		return this.status;
-	}
-
-	public void setStatus(final String status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 
-	public Long getDocumento() {
-		return this.documento;
+	public Integer getOrigemPrincipal() {
+		return origemPrincipal;
 	}
 
-	public void setDocumento(final Long documento) {
-		this.documento = documento;
+	public void setOrigemPrincipal(Integer origemPrincipal) {
+		this.origemPrincipal = origemPrincipal;
+	}
+
+	public Integer getNumeroPrincipal() {
+		return numeroPrincipal;
+	}
+
+	public void setNumeroPrincipal(Integer numeroPrincipal) {
+		this.numeroPrincipal = numeroPrincipal;
+	}
+
+	public String getTipoProcesso() {
+		return tipoProcesso;
+	}
+
+	public void setTipoProcesso(String tipoProcesso) {
+		this.tipoProcesso = tipoProcesso;
 	}
 
 	@Override
 	public String toString() {
-		return "Mensagem{" + "origem=" + origem + ", status='" + status + '\'' + ", documento=" + documento + '}';
+		return "Mensagem{" + "status=" + status + ", origemPrincipal=" + origemPrincipal + ", numeroPrincipal="
+				+ numeroPrincipal + ", tipoProcesso=" + tipoProcesso + '}';
 	}
 
 	public void validar() {
-		if (this.origem == null || this.origem.equals("")) {
-			validacaoMensagens.add("Origem zuada.");
+		if (this.status == null) {
+			validacaoMensagens.add("Status informado inválido.");
 		}
 
-		if (this.status == null || this.status.equals("")) {
-			validacaoMensagens.add("Status zuada.");
+		if (this.origemPrincipal == null) {
+			validacaoMensagens.add("Origem Principal inválido.");
 		}
 
-		if (this.documento == null) {
-			validacaoMensagens.add("Documento zuado.");
+		if (this.numeroPrincipal == null) {
+			validacaoMensagens.add("Número Principal inválido.");
+		}
+
+		if (this.tipoProcesso == null || this.tipoProcesso.isEmpty()) {
+			validacaoMensagens.add("Tipo Processo inválido.");
 		}
 	}
 

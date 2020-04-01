@@ -1,6 +1,7 @@
 package br.com.hackathon.auto.hackathon_auto.config;
 
 import javax.jms.JMSException;
+import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import com.amazonaws.internal.StaticCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.wmq.WMQConstants;
 
 @Configuration
 @EnableJms
@@ -80,6 +82,14 @@ public class JmsConfig {
 		jmsTemplate.setConnectionFactory(mqQueueConnectionFactory);
 		return jmsTemplate;
 	}
+	
+	@Bean("mq2")
+	public JmsTemplate jmsTemplate(@Autowired QueueConnectionFactory queueConnectionFactory) throws JMSException {
+		JmsTemplate jmsTemplate = new JmsTemplate();
+		jmsTemplate.setConnectionFactory(queueConnectionFactory);
+		jmsTemplate.setDeliveryPersistent(false);
+		return jmsTemplate;
+	}
 
 	/**
 	 * Setting up the MQQueueConnectionFactory in a Client mode
@@ -88,11 +98,16 @@ public class JmsConfig {
 	@Qualifier("clientmode")
 	public MQQueueConnectionFactory ibmMQConnectionFactoryInClientMode() throws JMSException {
 		final MQQueueConnectionFactory mqQueueConnectionFactory = new MQQueueConnectionFactory();
-		mqQueueConnectionFactory.setQueueManager("QMLI1062");
-		mqQueueConnectionFactory.setTransportType(1);
-		mqQueueConnectionFactory.setConnectionNameList("LI1062");
-		mqQueueConnectionFactory.setChannel("SRVLI1062");
+//		mqQueueConnectionFactory.setQueueManager("QMLI1062");
+//		mqQueueConnectionFactory.setTransportType(1);
+//		mqQueueConnectionFactory.setConnectionNameList("LI1062");
+//		mqQueueConnectionFactory.setChannel("SRVLI1062");
+		mqQueueConnectionFactory.setQueueManager("QMLI1850");
+		mqQueueConnectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
+		mqQueueConnectionFactory.setConnectionNameList("172.26.163.71");
+		mqQueueConnectionFactory.setChannel("SRVLI1850");
 
 		return mqQueueConnectionFactory;
 	}
+
 }

@@ -1,5 +1,10 @@
 package br.com.hackathon.auto.hackathon_auto.service;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -8,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
 
 import br.com.hackathon.auto.hackathon_auto.StatusFilasEnum;
@@ -41,6 +47,25 @@ public class GerenciadorService {
 		LOGGER.info("Mensagem Recebida: [fila]: JURIDICO.4GL.01R.RS [mensagem] " + mensagemContent);
 		this.processarMensagem(mensagemContent);
 	}
+
+	/**
+	 * Metodo responsavel pelo Listener da Fila MQ
+	 * 
+	 * @param mensagemContent
+	 *            - Contem a Mensagem para processamento
+	 * @throws JAXBException
+	 *             - {@link JAXBException}
+	 * @throws Exception
+	 *             - {@link Exception}
+	 */
+	// @JmsListener(containerFactory = "mq_listener", destination =
+	// "JURIDICO.4GL.01R.RQ")
+	// private void receiveMessageTeste(final String mensagemContent) throws
+	// JAXBException, Exception {
+	// LOGGER.info("Mensagem Recebida: [fila]: JURIDICO.4GL.01R.RQ [mensagem] " +
+	// mensagemContent);
+	// this.processarMensagem(mensagemContent);
+	// }
 
 	/**
 	 * Metodo responsavel pelo Listener da Fila SQS
@@ -90,8 +115,20 @@ public class GerenciadorService {
 	 */
 	private void enviarFilaMQ(final String fila, final Mensagem mensagem) throws Exception {
 		try {
-			jmsTemplateMQ.convertAndSend("queue:///" + fila + "?targetClient=1",
-					Utils.jaxbObjectToXML(mensagem).toString());
+			String mensagemXml = Utils.jaxbObjectToXML(mensagem);
+			
+			MessageCreator messageCreator = new MessageCreator() {
+
+				@Override
+				public Message createMessage(final Session session) throws JMSException {
+					TextMessage message = session.createTextMessage(mensagemXml);
+					Queue queue = session.createQueue("JURIDICO.4GL.01R.RS");
+	                message.setJMSReplyTo(queue);
+                    
+                    return message;
+				}
+			};
+			jmsTemplateMQ.send("queue:///" + fila + "?targetClient=1", messageCreator);
 			LOGGER.info("Mensagem enviada: [fila]: " + fila + " [mensagem] " + Utils.jaxbObjectToXML(mensagem));
 		} catch (final Exception e) {
 			throw e;
